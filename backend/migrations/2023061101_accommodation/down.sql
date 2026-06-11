@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS AdminActionLog;
+DROP TABLE IF EXISTS Allocation;
+DROP TABLE IF EXISTS RoommateRequest;
+DROP TABLE IF EXISTS Preference;

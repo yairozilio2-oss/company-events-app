@@ -1,0 +1,44 @@
+CREATE TABLE Preference (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  event_id INTEGER NOT NULL,
+  preferred_room_type TEXT,
+  roommate_gender_preference TEXT,
+  notes TEXT,
+  FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE,
+  UNIQUE(user_id, event_id)
+);
+
+CREATE TABLE RoommateRequest (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  requester_id INTEGER NOT NULL,
+  target_id INTEGER NOT NULL,
+  event_id INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'Pending',
+  locked_at DATETIME,
+  FOREIGN KEY (requester_id) REFERENCES User(id) ON DELETE CASCADE,
+  FOREIGN KEY (target_id) REFERENCES User(id) ON DELETE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE,
+  UNIQUE(requester_id, target_id, event_id)
+);
+
+CREATE TABLE Allocation (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  room_id INTEGER NOT NULL,
+  event_id INTEGER NOT NULL,
+  assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE,
+  FOREIGN KEY (room_id) REFERENCES Room(id) ON DELETE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES Event(id) ON DELETE CASCADE
+);
+
+CREATE TABLE AdminActionLog (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  admin_id INTEGER NOT NULL,
+  action_type TEXT NOT NULL,
+  details TEXT,
+  timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (admin_id) REFERENCES User(id) ON DELETE CASCADE
+);

@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+// Enums not supported in sqlite, use strings
+
+model User {
+  id               Int          @id @default(autoincrement())
+  email            String       @unique
+  passwordHash     String
+  name             String
+  gender           String       @default("MALE")
+  role             String       @default("EMPLOYEE")
+  
+  registrations    Registration[]
+  sentRequests     Preference[] @relation("Requester")
+  receivedRequests Preference[] @relation("Requested")
+}
+
+model Event {
+  id            Int            @id @default(autoincrement())
+  name          String
+  date          DateTime
+  location      String
+  deadline      DateTime?
+  
+  rooms         Room[]
+  registrations Registration[]
+  preferences   Preference[]
+}
+
+
+
+model Registration {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  eventId     Int
+  roomId      Int?
+  
+  // General Preferences
+  kosherFood  Boolean  @default(false)
+  arrivalTime String?
+
+  // New fields
+  status          String             @default("PENDING")
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  paid            Boolean?           @default(false)
+  paymentId       String?
+  specialRequests String?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  room        Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, eventId])
+  @@index([eventId])
+  @@index([roomId])
+}
+
+model Room {
+  id            Int            @id @default(autoincrement())
+  capacity      Int
+  gender        String         // "M", "F", or "Mixed"
+  eventId       Int
+  
+  event         Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrations Registration[]
+}
+
+
+model Preference {
+  id          Int    @id @default(autoincrement())
+  requesterId Int
+  requestedId Int
+  eventId     Int
+  status      String @default("pending") // "pending", "approved", "rejected"
+  
+  requester   User   @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  requested   User   @relation("Requested", fields: [requestedId], references: [id], onDelete: Cascade)
+  event       Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, requestedId, eventId])
+}
+
+model Accommodation {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String
+  price       Float
+  capacity    Int
+  address     String
+  photos      String
+  amenities   String
+}
